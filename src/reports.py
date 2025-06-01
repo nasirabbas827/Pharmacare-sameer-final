@@ -129,10 +129,9 @@ class ReportsWindow:
             for col in self.tree["columns"]:
                 self.tree.heading(col, text=col)
                 self.tree.column(col, width=300)
-            self.tree.insert('', tk.END, values=("Revenue", f"{report_data['revenue']:.2f}"))
-            self.tree.insert('', tk.END, values=("COGS (Sales)", f"{report_data['cogs_sales']:.2f}"))
-            self.tree.insert('', tk.END, values=("COGS (Purchases)", f"{report_data['cogs_purchases']:.2f}"))
-            self.tree.insert('', tk.END, values=("Profit", f"{report_data['profit']:.2f}"))
+            self.tree.insert('', tk.END, values=("Sales Profit", f"{report_data['sales_profit']:.2f}"))
+            self.tree.insert('', tk.END, values=("Purchase Profit", f"{report_data['purchase_profit']:.2f}"))
+            self.tree.insert('', tk.END, values=("Total Profit", f"{report_data['total_profit']:.2f}"))
 
         if not report_data:
             messagebox.showinfo("Info", "No data available for the selected report.")
@@ -177,10 +176,9 @@ class ReportsWindow:
                                         purchase['quantity_purchased'], purchase['cost_price'], purchase['purchase_date']])
                 elif report_type == "profit":
                     writer.writerow(["Metric", "Value"])
-                    writer.writerow(["Revenue", f"{report_data['revenue']:.2f}"])
-                    writer.writerow(["COGS (Sales)", f"{report_data['cogs_sales']:.2f}"])
-                    writer.writerow(["COGS (Purchases)", f"{report_data['cogs_purchases']:.2f}"])
-                    writer.writerow(["Profit", f"{report_data['profit']:.2f}"])
+                    writer.writerow(["Sales Profit", f"{report_data['sales_profit']:.2f}"])
+                    writer.writerow(["Purchase Profit", f"{report_data['purchase_profit']:.2f}"])
+                    writer.writerow(["Total Profit", f"{report_data['total_profit']:.2f}"])
             messagebox.showinfo("Success", f"Report exported as {filename}")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to export report: {e}")

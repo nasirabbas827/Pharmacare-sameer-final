@@ -226,39 +226,38 @@ def generate_report(report_type, start_date, end_date):
         return cursor.fetchall()
     
     elif report_type == 'profit':
-        # Fetch sales data
+        # Fetch sales data with unit_price from medical_items
         cursor.execute('''
-            SELECT s.item_id, s.quantity_sold, s.sale_price, m.cost_price
+            SELECT s.item_id, s.quantity_sold, s.sale_price, m.cost_price, m.unit_price
             FROM sales s
             JOIN medical_items m ON s.item_id = m.item_id
             WHERE s.sale_date BETWEEN ? AND ?
         ''', (start_date, end_date))
         sales = cursor.fetchall()
 
-        # Fetch purchases data
+        # Fetch purchases data with unit_price from medical_items
         cursor.execute('''
-            SELECT p.item_id, p.quantity_purchased, p.cost_price
+            SELECT p.item_id, p.quantity_purchased, p.cost_price, m.unit_price
             FROM purchases p
+            JOIN medical_items m ON p.item_id = m.item_id
             WHERE p.purchase_date BETWEEN ? AND ?
         ''', (start_date, end_date))
         purchases = cursor.fetchall()
 
-        # Calculate revenue and COGS from sales
-        revenue = sum(row['quantity_sold'] * row['sale_price'] for row in sales)
-        cogs_sales = sum(row['quantity_sold'] * row['cost_price'] for row in sales)
+        # Calculate sales profit: (sale_price * quantity_sold) - (unit_price * quantity_sold)
+        sales_profit = sum((row['sale_price'] * row['quantity_sold']) - (row['unit_price'] * row['quantity_sold']) for row in sales)
 
-        # Calculate total cost from purchases
-        cogs_purchases = sum(row['quantity_purchased'] * row['cost_price'] for row in purchases)
+       # Calculate purchase profit: (unit_price * quantity_purchased) - (cost_price * quantity_purchased)
+        purchase_profit = sum((row['unit_price'] * row['quantity_purchased']) - (row['cost_price'] * row['quantity_purchased']) for row in purchases)
 
-        # Total COGS is from sales (since only sold items contribute to profit calculation)
-        total_cogs = cogs_sales
+        # Calculate total profit
+        total_profit = sales_profit + purchase_profit
 
         conn.close()
         return {
-            'revenue': revenue,
-            'cogs_sales': cogs_sales,
-            'cogs_purchases': cogs_purchases,
-            'profit': revenue - total_cogs
+            'sales_profit': sales_profit,
+            'purchase_profit': purchase_profit,
+            'total_profit': total_profit
         }
     
     conn.close()
