@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from database import search_items, record_purchase, record_sale
+from database import search_items, record_sale
 from PIL import Image, ImageTk
 import os
 
@@ -9,7 +9,7 @@ class UserItemsWindow:
         self.root = root
         self.user_data = user_data
         self.parent_root = parent_root
-        self.root.title("PharmaCare Items - Sell/Purchase")
+        self.root.title("PharmaCare Items - Sell")
         self.root.state('zoomed')  # Fullscreen
         self.root.resizable(True, True)
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -72,23 +72,6 @@ class UserItemsWindow:
 
         tk.Button(sale_frame, text="Sell Item", command=self.sell_item, font=("Arial", 11), bg="#4CAF50", fg="white").grid(row=3, column=0, columnspan=2, pady=10)
 
-        # Purchase form
-        purchase_frame = tk.LabelFrame(form_frame, text="Purchase Item", font=("Arial", 12), padx=10, pady=10, relief=tk.RIDGE)
-        purchase_frame.pack(fill=tk.X, pady=5)
-
-        tk.Label(purchase_frame, text="Item ID:", font=("Arial", 11)).grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-        self.purchase_item_id = tk.Entry(purchase_frame, width=20, font=("Arial", 11))
-        self.purchase_item_id.grid(row=0, column=1, padx=5, pady=5)
-
-        tk.Label(purchase_frame, text="Quantity:", font=("Arial", 11)).grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-        self.purchase_quantity = tk.Entry(purchase_frame, width=20, font=("Arial", 11))
-        self.purchase_quantity.grid(row=1, column=1, padx=5, pady=5)
-
-        tk.Label(purchase_frame, text="Cost Price:", font=("Arial", 11)).grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
-        self.purchase_cost_price = tk.Entry(purchase_frame, width=20, font=("Arial", 11))
-        self.purchase_cost_price.grid(row=2, column=1, padx=5, pady=5)
-
-        tk.Button(purchase_frame, text="Purchase Item", command=self.purchase_item, font=("Arial", 11), bg="#2196F3", fg="white").grid(row=3, column=0, columnspan=2, pady=10)
 
         # Image display frame
         self.image_frame = tk.LabelFrame(right_frame, text="Item Image", font=("Arial", 12), padx=10, pady=10)
@@ -181,37 +164,15 @@ class UserItemsWindow:
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
-    def purchase_item(self):
-        """Handles the purchase of an item."""
-        try:
-            item_id = int(self.purchase_item_id.get())
-            quantity = int(self.purchase_quantity.get())
-            cost_price = float(self.purchase_cost_price.get())
-
-            record_purchase(item_id, quantity, cost_price)
-            messagebox.showinfo("Success", "Item purchased successfully. Stock updated.")
-            self.clear_purchase_form()
-            self.load_items()
-            self.image_label.config(image='', text="No image selected")
-        except ValueError:
-            messagebox.showerror("Error", "Please enter valid numeric values in purchase form.")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
-
     def clear_sale_form(self):
         """Clears the sale form fields."""
         self.sale_item_id.delete(0, tk.END)
         self.sale_quantity.delete(0, tk.END)
         self.sale_price.delete(0, tk.END)
 
-    def clear_purchase_form(self):
-        """Clears the purchase form fields."""
-        self.purchase_item_id.delete(0, tk.END)
-        self.purchase_quantity.delete(0, tk.END)
-        self.purchase_cost_price.delete(0, tk.END)
 
     def on_close(self):
         """Closes the report window and returns to the dashboard."""
         self.root.destroy()
         self.parent_root.deiconify()
-        self.parent_root.state("zoomed")  # Ensure dashboard is maximized again
+        self.parent_root.state("zoomed")  

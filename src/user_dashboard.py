@@ -1,20 +1,36 @@
 import tkinter as tk
 from user_items import UserItemsWindow
-from reports import ReportsWindow  # New module for report generation
+from user_reports import ReportsWindow
 
 class UserDashboard:
     def __init__(self, root, user_data):
         self.root = root
         self.user_data = user_data
-        self.root.title("User Dashboard")
-        self.root.state('zoomed')  # Fullscreen
+        self.root.title("Pharmacy Management System - User Dashboard")
+        self.root.state('zoomed')
         self.root.resizable(True, True)
 
-        tk.Label(self.root, text=f"Welcome, {self.user_data.get('username', 'User')}", font=("Arial", 16)).pack(pady=20)
+        # Dashboard Heading
+        tk.Label(self.root, text="Pharmacy Management System - User Dashboard",
+                 font=("Arial", 20, "bold"), fg="#333").pack(pady=20)
 
-        tk.Button(self.root, text="View Items", width=20, command=self.open_items_window, font=("Arial", 11), bg="#2196F3", fg="white").pack(pady=10)
-        tk.Button(self.root, text="Generate Reports", width=20, command=self.open_reports_window, font=("Arial", 11), bg="#4CAF50", fg="white").pack(pady=10)
-        tk.Button(self.root, text="Logout", width=20, command=self.logout, font=("Arial", 11), bg="#f44336", fg="white").pack(pady=30)
+        # Welcome message with username
+        username = self.user_data.get('username', 'User')
+        tk.Label(self.root, text=f"Welcome, {username}", font=("Arial", 14)).pack(pady=10)
+
+        # Frame to hold buttons in a single row
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(pady=50)
+
+        # Buttons in a row with larger size
+        tk.Button(button_frame, text="View & Sale Items", width=25, height=2, command=self.open_items_window,
+                  font=("Arial", 11), bg="#2196F3", fg="white").grid(row=0, column=0, padx=20)
+
+        tk.Button(button_frame, text="Generate Reports", width=25, height=2, command=self.open_reports_window,
+                  font=("Arial", 11), bg="#4CAF50", fg="white").grid(row=0, column=1, padx=20)
+
+        tk.Button(button_frame, text="Logout", width=25, height=2, command=self.logout,
+                  font=("Arial", 11), bg="#f44336", fg="white").grid(row=0, column=2, padx=20)
 
     def open_items_window(self):
         self.root.withdraw()

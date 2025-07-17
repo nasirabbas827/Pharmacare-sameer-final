@@ -202,55 +202,58 @@ def generate_report(report_type, start_date, end_date):
     """Generates reports for stock, sales, purchases, or profit."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    
+
     if report_type == 'stock':
         cursor.execute('SELECT item_id, name, category, stock_quantity, image_path FROM medical_items')
         return cursor.fetchall()
-    
-    elif report_type == 'sales':
+
+    # Extend date range to include full day time
+    start_datetime = f"{start_date} 00:00:00"
+    end_datetime = f"{end_date} 23:59:59"
+
+    if report_type == 'sales':
         cursor.execute('''
             SELECT s.sale_id, s.item_id, m.name, s.quantity_sold, s.sale_price, s.sale_date
             FROM sales s
             JOIN medical_items m ON s.item_id = m.item_id
             WHERE s.sale_date BETWEEN ? AND ?
-        ''', (start_date, end_date))
+        ''', (start_datetime, end_datetime))
         return cursor.fetchall()
-    
+
     elif report_type == 'purchases':
         cursor.execute('''
             SELECT p.purchase_id, p.item_id, m.name, p.quantity_purchased, p.cost_price, p.purchase_date
             FROM purchases p
             JOIN medical_items m ON p.item_id = m.item_id
             WHERE p.purchase_date BETWEEN ? AND ?
-        ''', (start_date, end_date))
+        ''', (start_datetime, end_datetime))
         return cursor.fetchall()
-    
+
     elif report_type == 'profit':
-        # Fetch sales data with unit_price from medical_items
         cursor.execute('''
             SELECT s.item_id, s.quantity_sold, s.sale_price, m.cost_price, m.unit_price
             FROM sales s
             JOIN medical_items m ON s.item_id = m.item_id
             WHERE s.sale_date BETWEEN ? AND ?
-        ''', (start_date, end_date))
+        ''', (start_datetime, end_datetime))
         sales = cursor.fetchall()
 
-        # Fetch purchases data with unit_price from medical_items
         cursor.execute('''
             SELECT p.item_id, p.quantity_purchased, p.cost_price, m.unit_price
             FROM purchases p
             JOIN medical_items m ON p.item_id = m.item_id
             WHERE p.purchase_date BETWEEN ? AND ?
-        ''', (start_date, end_date))
+        ''', (start_datetime, end_datetime))
         purchases = cursor.fetchall()
 
-        # Calculate sales profit: (sale_price * quantity_sold) - (unit_price * quantity_sold)
-        sales_profit = sum((row['sale_price'] * row['quantity_sold']) - (row['unit_price'] * row['quantity_sold']) for row in sales)
+        sales_profit = sum(
+            (row['sale_price'] * row['quantity_sold']) - (row['unit_price'] * row['quantity_sold']) for row in sales
+        )
 
-       # Calculate purchase profit: (unit_price * quantity_purchased) - (cost_price * quantity_purchased)
-        purchase_profit = sum((row['unit_price'] * row['quantity_purchased']) - (row['cost_price'] * row['quantity_purchased']) for row in purchases)
+        purchase_profit = sum(
+            (row['unit_price'] * row['quantity_purchased']) - (row['cost_price'] * row['quantity_purchased']) for row in purchases
+        )
 
-        # Calculate total profit
         total_profit = sales_profit + purchase_profit
 
         conn.close()
@@ -259,7 +262,7 @@ def generate_report(report_type, start_date, end_date):
             'purchase_profit': purchase_profit,
             'total_profit': total_profit
         }
-    
+
     conn.close()
     return []
 
